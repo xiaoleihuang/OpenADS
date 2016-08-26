@@ -41,9 +41,13 @@ ENV PATH $ZEPPELIN_HOME/zeppelin-web/node:$PATH
 ENV PATH $ZEPPELIN_HOME/zeppelin-web/node_modules/grunt-cli/bin:$PATH
 WORKDIR $ZEPPELIN_HOME
 
+# build Zeppelin
 RUN git config --global url."https://".insteadOf git:// \
 	&& git clone https://github.com/apache/zeppelin.git $ZEPPELIN_HOME \
 	&& cd zeppelin \
-	&& mvn clean package -Pspark-2.0 -Phadoop-2.6 -Pyarn -Ppyspark -Pscala-2.11 -DskipTests \
+	&& mvn clean package -Pspark-1.6 -Phadoop-2.6 -Pyarn -Ppyspark -Pscala-2.11 -DskipTests \
 	&& cp /OpenADS/configuration/zeppelin-site.xml ./conf/
+	&& cp /OpenADS/configuration/zeppelin-env.sh ./conf/
+	&& mkdir ./notebook/OpenADS
+	&& cp /OpenADS/notebook/. ./notebook/
 	&& bin/zeppelin-daemon.sh start

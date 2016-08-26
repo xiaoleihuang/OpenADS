@@ -66,7 +66,7 @@ For Linux User: to receive syslog data from remote data source, you must do two 
     * add `*.* @Your_IP:Your_Port;RSYSLOG_SyslogProtocol23Format`(UDP) `*.* @@localhost:514;RSYSLOG_SyslogProtocol23Format`(TCP) in the file;
     * restart the service `sudo service rsyslog restart`;
 * Configure the receiver system:
-    * Allow the port in your Firewall: 
+    * Allow the port in your Firewall:
         * `iptables -A INPUT -p tcp -s Your_IP --dport Your_Port -j ACCEPT`;
         * `iptables -A INPUT -p udp -s Your_IP --dport Your_Port -j ACCEPT`;
     * Grant permission to java (iff Your_Port is lower than 1024, such as 514):
@@ -80,14 +80,14 @@ For local test, just use localhost and port 514.
 If you do not run the project in docker, you have to download and configure Spark by referring to the [Spark documentation](http://spark.apache.org/docs/1.6.2/).
 
 #### Zeppelin ####
-If you do not run the project in docker, you have to download and configure [Apache Zepplin](http://zeppelin.apache.org):{target="_blank"} by the following steps.
+If you do not run the project in docker, you have to download and configure [Apache Zepplin](http://zeppelin.apache.org) by the following steps.
 
 * Download
 	* wget -c http://www-us.apache.org/dist/zeppelin/zeppelin-0.6.0/zeppelin-0.6.0-bin-all.tgz
 	* tar -xzvf zeppelin-0.6.0-bin-all.tgz
 * Avoid port conflict with Spark
 	* cp zeppelin-site.xml.template zeppelin-site.xml
-	* vim zeppelin-site.xml: 
+	* vim zeppelin-site.xml:
     ```
     <property>
     <name>zeppelin.server.port</name>
@@ -97,6 +97,21 @@ If you do not run the project in docker, you have to download and configure [Apa
 	```
 * Run Daemon
 	* ./zeppelin-version-bin-all/bin/zeppelin-daemon.sh start
+
+* Issues
+	* When using external Spark, the notebook should first list the following:
+	```
+	%dep
+	z.reset()
+	z.load("org.apache.spark:spark-streaming-twitter_2.10:1.4.1")
+	```
+	Because the external Spark is lack of such configuration, and running streaming program may cause error.
+
+	* Since we need OpenADS jar as dependency, there two ways to load such a dependency:
+		* z.load("Dependency_OpenADS.jar")
+		* configure settings in zeppelin-env.sh, using SPARK_SUBMIT_OPTIONS --jars.
+
+	*In this demo, we deploy the second method. Please modify its path to the jar, the demo code works in Docker. Please refer to [dependency management](https://zeppelin.apache.org/docs/0.6.0/manual/dependencymanagement.html).*
 
 How to use
 ----------
@@ -116,7 +131,7 @@ To run the project, you should submit the task to Spark. Below is a demo code:
     ./configuration/config.properties
 ```
 * To run it on servers \
-``` 
+```
 	~/spark/bin/spark-submit \
     --class "com.scorelab.openads.receiver.PcapReceiver" \
     --master Spark_Master_Address \
@@ -129,11 +144,11 @@ The properties is optional, you could leave it alone and you could use the defau
     ~/spark/bin/spark-submit \
     --class "com.scorelab.openads.receiver.PcapReceiver" \
     --master local[*] \
-    ./target/OpenADS-0.1-SNAPSHOT-jar-with-dependencies.jar 
+    ./target/OpenADS-0.1-SNAPSHOT-jar-with-dependencies.jar
 ```
 
 #### How to use Docker ####
-To run it in docker, you could follow the steps below. 
+To run it in docker, you could follow the steps below.
 
 * Biuld Docker Container \
 	docker build -t your_user/your_container_name:version.
@@ -159,7 +174,7 @@ To run it in docker, you could follow the steps below.
     file://Path to the config/config.properties
 ```
 * Version <br/>
-Hadoop 2.6.0 and Apache Spark v1.6.0 on Centos 
+Hadoop 2.6.0 and Apache Spark v1.6.0 on Centos
 
 * Issues <br/>
 	* WebUI of Spark: <br/>
